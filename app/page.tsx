@@ -134,9 +134,9 @@ export default function Home() {
       // Proceed to send tokens
       sendUserOperation({
         uo: {
-          target: inputAddress,
+          target: inputAddress as `0x${string}`,
           data: "0x",
-          value: ethers.parseEther(value),
+          value: ethers.parseEther(value.toString()),
         },
       });
     } catch (error) {
