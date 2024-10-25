@@ -31,3 +31,68 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Input fields customization */
+.input-field {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	transition: border-color 0.2s;
+  }
+  
+  .input-field:focus {
+	outline: none;
+	border-color: #4f46e5; /* Indigo focus color */
+	box-shadow: 0 0 8px rgba(79, 70, 229, 0.2);
+  }
+  
+  .chain-select {
+	width: 100%;
+	padding: 0.5rem;
+	font-size: 1rem;
+	border: 1px solid #d1d5db;
+	border-radius: 0.375rem;
+	background-color: white;
+	color: #4f46e5;
+	cursor: pointer;
+	transition: border-color 0.2s ease;
+  }
+  
+  .chain-select:focus {
+	outline: none;
+	border-color: #4f46e5;
+  }
+  .chain-switcher {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+  }
+  
+  .chain-select {
+	width: 200px;
+	padding: 8px;
+	border-radius: 8px;
+	border: 1px solid #ccc;
+	background-color: white;
+	font-size: 16px;
+	cursor: pointer;
+  }
+  
+  button {
+	transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+	opacity: 0.8;
+  }
+  select {
+	width: 100%;
+	padding: 8px;
+	border-radius: 8px;
+	border: 1px solid #ccc;
+	background-color: white;
+	cursor: pointer;
+  }
+  
