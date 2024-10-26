@@ -1,44 +1,101 @@
-See [accountkit.alchemy.com](https://accountkit.alchemy.com/) for the most up to date documentation!
+# Dema Smart Account
 
-- [quick start guide](https://accountkit.alchemy.com/react/quickstart) to Account Kit
-- [demo](https://demo.alchemy.com/)
+Dema Smart Account Authentication provides a streamlined approach for smart contract interactions, user authentication, and transactions using Alchemy's `account-kit`.
 
-![image](https://github.com/user-attachments/assets/b7a820e7-1927-4bee-8eaa-52ca4af0f87a)
+### Live site:
 
-This is a [Next.js](https://nextjs.org/) template bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+[Dema-shop-contracts](https://dema-shop-contracts.vercel.app/)
 
-## Getting Started
+## Installation Guide
 
-First, download the template:
+### Step 1: Clone the Repository
+
+Clone the repository to your local machine:
 
 ```bash
-yarn create next-app account-kit-app -e https://github.com/avarobinson/account-kit-quickstart
+git clone https://github.com/RutvikGujarati/dema-shop-contracts
+
 ```
 
-### Get you alchemy api key
+### Step 2: Install Dependencies
 
-- Create a new embedded accounts configuration for an alchemy app in your [dashboard](https://dashboard.alchemy.com/accounts)
-- Replace the api key in the config.ts file
+Navigate to the project directory and install the necessary dependencies:
 
-### Run the app
+```bash
+cd dema-shop-contracts
+yarn
+```
+
+### Step 3: Set Up Environment Variables
+
+Configure your `.env.local` file according to the requirements specified in `.env`
+
+### Step 4: Start the Development Server
+
+Use one of the following commands to start the server:
 
 ```bash
 yarn dev
+# OR
+npm run dev
 ```
 
-Follow this [quick start guide](https://accountkit.alchemy.com/) for more details!
+### Authentication
 
-## Learn More
+- creating Auth sign up using alchemy **account-kit** @account-kit/react.
 
-To learn more about Next.js, take a look at the following resources:
+- use `useAuthModal` hook for login and `useLogout` hook for logout.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```javascript
+import { useAuthModal, useLogout } from "@account-kit/react";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+// Display login modal
+const { showModal } = useAuthModal();
+showModal();
 
-## Deploy on Vercel
+// Logout function
+const logout = useLogout();
+logout();
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### sending transaction to EOA Accounts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project enables users to send tokens to EOA addresses through smart account abstraction.
+
+1. Initialize Smart Account
+
+Initialize the smart account using the `useSmartAccountClient` hook. This creates an address for the user, enabling interaction with the blockchain through an abstracted account.
+
+```javascript
+import { useSmartAccountClient } from "@account-kit/react";
+const { client, address } = useSmartAccountClient({
+  type: "LightAccount",
+});
+```
+
+2. Send Tokens to EOA address using `useSendUserOperation` or uo.
+
+To send tokens to an EOA address, use the `useSendUserOperation` hook, which initiates the user operation for transactions.
+
+```javascript
+const { sendUserOperation, isSendingUserOperation } = useSendUserOperation({
+  client,
+  waitForTxn: true,
+  onSuccess: ({ hash }) => console.log("Transaction Hash:", hash),
+  onError: (error) => console.error("Error:", error),
+});
+```
+
+3. Sending Transactions
+
+After initializing `sendUserOperation`, you can send a transaction by specifying the target address, data, and value.
+
+```javascript
+sendUserOperation({
+  uo: {
+    target: "address",
+    data: "0x",
+    value: ethers.parseEther("0.001"),
+  },
+});
+```

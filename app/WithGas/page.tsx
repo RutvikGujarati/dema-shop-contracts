@@ -13,7 +13,6 @@ import { useChain } from "@account-kit/react";
 import {
   baseSepolia,
   sepolia,
-  optimismSepolia,
   polygonAmoy,
 } from "@account-kit/infra";
 import Gas from "@/components/Gas";
@@ -41,19 +40,20 @@ export default function Home() {
     "idle" | "sending" | "completed" | "failed"
   >("idle");
 
-  const { sendUserOperation, isSendingUserOperation } = useSendUserOperation({
-    client,
-    waitForTxn: true,
-    onSuccess: ({ hash }) => {
-      console.log("Transaction hash:", hash);
-      setHash(hash);
-      setTransactionStatus("completed");
-    },
-    onError: (error) => {
-      console.error("Transaction failed:", error);
-      setTransactionStatus("failed");
-    },
-  });
+  const { sendUserOperationAsync, isSendingUserOperation } =
+    useSendUserOperation({
+      client,
+      waitForTxn: true,
+      onSuccess: ({ hash }) => {
+        console.log("Transaction hash:", hash);
+        setHash(hash);
+        setTransactionStatus("completed");
+      },
+      onError: (error) => {
+        console.error("Transaction failed:", error);
+        setTransactionStatus("failed");
+      },
+    });
 
   function getRpcUrl() {
     switch (selectedChain) {
@@ -138,7 +138,7 @@ export default function Home() {
       const gasEstimate = await provider.estimateGas({
         to: inputAddress,
         value: ethers.parseEther(value),
-        data: "0x", // Additional data if needed
+        data: "0x",
       });
 
       setEstimatedGas(ethers.formatUnits(gasEstimate, "gwei"));
@@ -146,11 +146,9 @@ export default function Home() {
         `Estimated Gas: ${ethers.formatUnits(gasEstimate, "gwei")} Gwei`
       );
 
-      // Start the transaction process
       setTransactionInProgress(true);
 
-      // Send tokens
-      sendUserOperation({
+      sendUserOperationAsync({
         uo: {
           target: inputAddress as `0x${string}`,
           data: "0x",
@@ -212,7 +210,6 @@ export default function Home() {
           >
             {isTransactionInProgress ? "Processing..." : "Send Tokens"}
           </button>
-          <Gas />
           {transactionStatus === "sending" && (
             <p className="text-yellow-500 font-medium mt-2 animate-pulse">
               Transaction is being processed...

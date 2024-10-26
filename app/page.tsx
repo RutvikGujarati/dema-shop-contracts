@@ -203,12 +203,12 @@ export default function Home() {
           <p className="mt-2">
             Estimated Gas: {estimatedGas ? `${estimatedGas} Gwei` : "N/A"}
           </p>
-          <button
+          {/* <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
             With Gas Sending
-          </button>
+          </button> */}
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}
