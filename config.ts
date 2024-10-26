@@ -12,28 +12,27 @@ import {
 	sepolia,
   } from "@account-kit/infra";
   import { QueryClient } from "@tanstack/react-query";
-  import { polygon,blastSepolia } from "viem/chains";
   
   const uiConfig: AlchemyAccountsUIConfig = {
 	illustrationStyle: "outline",
 	auth: {
 	  sections: [
-		//   [
-		//     {
-		//       type: "social",
-		//       authProviderId: "auth0",
-		//       auth0Connection: "google-oauth2",
-		//       logoUrl: "./apple.png",
-		//       mode: "popup",
-		//     },
-		//   ],
+		 
 		[{ type: "email" }],
 		[
 		  { type: "passkey" },
 		  { type: "social", authProviderId: "google", mode: "popup" },
 		  { type: "social", authProviderId: "facebook", mode: "popup" },
-		  { type: "social", authProviderId: "apple", mode: "popup" },
 		],
+		[
+		    {
+		      type: "social",
+		      authProviderId: "auth0",
+		      auth0Connection: "apple",
+		      logoUrl: "https://www.freeiconspng.com/img/14895",
+		      mode: "popup",
+		    },
+		  ],
 		[
 		  {
 			type: "external_wallets",
@@ -51,9 +50,9 @@ import {
 	  chain: baseSepolia,
 	  chains: [
 		{
-		  chain: polygon,
+		  chain: polygonAmoy,
 		  transport: alchemy({ apiKey: process.env.NEXT_PUBLIC_API_KEY ?? "" }),
-		  policyId: "MAINNET_GAS_MANAGER_POLICY_ID",
+		  policyId: process.env.NEXT_PUBLIC_POLYGON_POLICY_ID,
 		},
 		{
 		  chain: sepolia,
@@ -68,7 +67,7 @@ import {
 		{
 		  chain: baseSepolia,
 		  transport: alchemy({ apiKey: process.env.NEXT_PUBLIC_API_KEY ?? "" }),
-		  policyId: "SEPOLIA_GAS_MANAGER_POLICY_ID",
+		  policyId: process.env.NEXT_PUBLIC_POLICY_ID,
 		},
 	  ],
 	  ssr: true, // more about ssr: https://accountkit.alchemy.com/react/ssr

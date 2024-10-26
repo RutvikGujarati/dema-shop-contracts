@@ -12,11 +12,11 @@ import { useEffect, useState } from "react";
 import { useChain } from "@account-kit/react";
 import {
   baseSepolia,
-  optimismSepolia,
-  polygon,
   sepolia,
+  optimismSepolia,
   polygonAmoy,
 } from "@account-kit/infra";
+import Gas from "@/components/Gas";
 
 export default function Home() {
   const user = useUser();
@@ -24,35 +24,35 @@ export default function Home() {
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
   const { chain, setChain, isSettingChain } = useChain();
-  const [estimatedGas, setEstimatedGas] = useState("");
-  const handleClick = () => {
-    window.location.href = "/WithGas";
-  };
 
+  const [estimatedGas, setEstimatedGas] = useState("");
+  const [tHash, setHash] = useState("");
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
 
   const [selectedChain, setSelectedChain] = useState<ChainType>("baseSepolia");
 
-  const policyIdMapping = {
-    polygonAmoy: process.env.NEXT_PUBLIC_POLYGON_POLICY_ID,
-    sepolia: process.env.NEXT_PUBLIC_SEPOLIA_POLICY_ID,
-    baseSepolia: process.env.NEXT_PUBLIC_BASE_SEPOLIA_POLICY_ID,
-  };
-
-  const { client, address } = useSmartAccountClient({
-    type: "LightAccount",
-    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], // Type assertion
-  });
+  const { client, address } = useSmartAccountClient({ type: "LightAccount" });
 
   const [inputAddress, setInputAddress] = useState("");
   const [value, setValue] = useState("0");
   const [balance, setBalance] = useState("");
+  const [isTransactionInProgress, setTransactionInProgress] = useState(false);
+  const [transactionStatus, setTransactionStatus] = useState<
+    "idle" | "sending" | "completed" | "failed"
+  >("idle");
 
   const { sendUserOperation, isSendingUserOperation } = useSendUserOperation({
     client,
     waitForTxn: true,
-    onSuccess: ({ hash }) => console.log("Transaction Hash:", hash),
-    onError: (error) => console.error("Error:", error),
+    onSuccess: ({ hash }) => {
+      console.log("Transaction hash:", hash);
+      setHash(hash);
+      setTransactionStatus("completed");
+    },
+    onError: (error) => {
+      console.error("Transaction failed:", error);
+      setTransactionStatus("failed");
+    },
   });
 
   function getRpcUrl() {
@@ -62,16 +62,26 @@ export default function Home() {
       case "sepolia":
         return process.env.NEXT_PUBLIC_SEPOLIA_RPC;
       case "baseSepolia":
-        return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
-
       default:
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
-
+  const handleClick = () => {
+    window.location.href = "/";
+  };
   function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
   }
+  useEffect(() => {
+    console.log("Selected Chain:", selectedChain);
+    console.log("RPC URL:", getRpcUrl());
+  }, [selectedChain]);
+
+  useEffect(() => {
+    if (!address) return;
+    console.log("Fetching balance for address:", address);
+    fetchBalance();
+  }, [address, selectedChain]);
 
   async function fetchBalance() {
     if (!address) return;
@@ -83,7 +93,6 @@ export default function Home() {
     }
 
     const provider = new ethers.JsonRpcProvider(rpcUrl);
-
     try {
       const balance = await provider.getBalance(address);
       const formattedBalance = ethers.formatEther(balance);
@@ -102,19 +111,16 @@ export default function Home() {
   }, [address, selectedChain]);
 
   function handleChainChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const selected = e.target.value as ChainType;
-
+    const selected = e.target.value as typeof selectedChain;
     if (selected !== selectedChain) {
-      // Prevent duplicate state updates
       setSelectedChain(selected);
-
-      if (selected === "baseSepolia") {
-        setChain({ chain: baseSepolia });
-      } else if (selected === "polygonAmoy") {
-        setChain({ chain: polygonAmoy });
-      } else if (selected === "sepolia") {
-        setChain({ chain: sepolia });
-      }
+      setChain(
+        selected === "baseSepolia"
+          ? { chain: baseSepolia }
+          : selected === "polygonAmoy"
+          ? { chain: polygonAmoy }
+          : { chain: sepolia }
+      );
     }
   }
 
@@ -132,7 +138,7 @@ export default function Home() {
       const gasEstimate = await provider.estimateGas({
         to: inputAddress,
         value: ethers.parseEther(value),
-        data: "0x",
+        data: "0x", // Additional data if needed
       });
 
       setEstimatedGas(ethers.formatUnits(gasEstimate, "gwei"));
@@ -140,7 +146,10 @@ export default function Home() {
         `Estimated Gas: ${ethers.formatUnits(gasEstimate, "gwei")} Gwei`
       );
 
-      // Proceed to send tokens
+      // Start the transaction process
+      setTransactionInProgress(true);
+
+      // Send tokens
       sendUserOperation({
         uo: {
           target: inputAddress as `0x${string}`,
@@ -150,9 +159,11 @@ export default function Home() {
       });
     } catch (error) {
       console.error("Error estimating gas:", error);
-      setEstimatedGas(""); // Reset if there's an error
+      setEstimatedGas("");
+      setTransactionInProgress(false);
     }
   }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
       {signerStatus.isInitializing ? (
@@ -164,6 +175,7 @@ export default function Home() {
             <span className="font-semibold">{address ?? "anon"}</span>.
           </p>
           <p className="mt-2">Balance: {balance || "Fetching..."}</p>
+
           <div>
             <p>Current Chain ID: {chain?.id}</p>
             <p>Current Chain Name: {chain?.name}</p>
@@ -198,16 +210,51 @@ export default function Home() {
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={sendTokens}
           >
-            {isSendingUserOperation ? "Sending..." : "Send Tokens"}
+            {isTransactionInProgress ? "Processing..." : "Send Tokens"}
           </button>
-          <p className="mt-2">
-            Estimated Gas: {estimatedGas ? `${estimatedGas} Gwei` : "N/A"}
-          </p>
+          <Gas />
+          {transactionStatus === "sending" && (
+            <p className="text-yellow-500 font-medium mt-2 animate-pulse">
+              Transaction is being processed...
+            </p>
+          )}
+
+          {transactionStatus === "completed" && (
+            <p className="text-green-500 font-semibold mt-2">
+              🎉 Transaction Successful! Hash: {tHash}
+            </p>
+          )}
+
+          {transactionStatus === "failed" && (
+            <p className="text-red-500 font-semibold mt-2">
+              ⚠️ Transaction failed. Please try again.
+            </p>
+          )}
+
+          {isTransactionInProgress && (
+            <p className="mt-2 text-gray-600 font-medium">
+              Estimated Gas: {estimatedGas} Gwei
+            </p>
+          )}
+
+          {tHash && (
+            <p className="mt-2 text-gray-100">
+              Transaction Hash:{" "}
+              <a
+                href={`https://sepolia.etherscan.io/tx/${tHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline hover:text-blue-500 transition-colors"
+              >
+                {tHash}
+              </a>
+            </p>
+          )}
           <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
-            With Gas Sending
+            Go back
           </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
