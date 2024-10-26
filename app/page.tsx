@@ -17,6 +17,7 @@ import {
   sepolia,
   polygonAmoy,
 } from "@account-kit/infra";
+import ABI from "./ContractCall/ABI.json";
 
 export default function Home() {
   const user = useUser();
@@ -26,7 +27,7 @@ export default function Home() {
   const { chain, setChain, isSettingChain } = useChain();
   const [estimatedGas, setEstimatedGas] = useState("");
   const handleClick = () => {
-    window.location.href = "/WithGas";
+    window.location.href = "/ContractCall";
   };
 
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
@@ -68,6 +69,24 @@ export default function Home() {
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
+
+//   const contractAddress = "0xf8FDa9e18ffe618Da320e316e75351FEdBE569c9";
+
+
+//   function CallContract() {
+//     console.log(`sending transaction to ...${contractAddress}`);
+//     sendUserOperation({
+//       uo: {
+//         target: contractAddress,
+//         data: encodeFunctionData({
+//           abi: ABI,
+//           functionName: "place_Order",
+//           args: ["0002", "1", "FirstOrder", "001"],
+//         }),
+//         value: ethers.parseEther("0.002"),
+//       },
+//     });
+//   }
 
   function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
@@ -203,12 +222,12 @@ export default function Home() {
           <p className="mt-2">
             Estimated Gas: {estimatedGas ? `${estimatedGas} Gwei` : "N/A"}
           </p>
-          {/* <button
+          <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
-            With Gas Sending
-          </button> */}
+            contract Interaction
+          </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}
