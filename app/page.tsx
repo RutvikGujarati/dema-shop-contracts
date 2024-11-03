@@ -1,5 +1,6 @@
 "use client";
 import {
+	useAddPasskey,
   useAuthModal,
   useLogout,
   useSendUserOperation,
@@ -20,14 +21,24 @@ import {
 import ABI from "./ContractCall/ABI.json";
 
 export default function Home() {
+	const { addPasskey, isAddingPasskey } = useAddPasskey();
+
   const user = useUser();
   const { openAuthModal } = useAuthModal();
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
   const { chain, setChain, isSettingChain } = useChain();
   const [estimatedGas, setEstimatedGas] = useState("");
+  const [isTransactionInProgress, setTransactionInProgress] = useState(false);
+  const [transactionTime, setTransactionTime] = useState("");
+  const [transactionHash, setTransactionHash] = useState("");
+  const [startTime, setStartTime] = useState<number | null>(null); // State to track start time
+
   const handleClick = () => {
     window.location.href = "/ContractCall";
+  };
+  const handleClickGas = () => {
+    window.location.href = "/WithGas";
   };
 
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
@@ -52,8 +63,20 @@ export default function Home() {
   const { sendUserOperation, isSendingUserOperation } = useSendUserOperation({
     client,
     waitForTxn: true,
-    onSuccess: ({ hash }) => console.log("Transaction Hash:", hash),
-    onError: (error) => console.error("Error:", error),
+    onSuccess: ({ hash }) => {
+      console.log("Transaction Hash:", hash);
+      setTransactionHash(hash);
+      const endTime = new Date().getTime();
+      if (startTime) {
+        const duration = (endTime - startTime) / 1000;
+        setTransactionTime(`${duration.toFixed(2)} seconds`);
+      }
+      setTransactionInProgress(false);
+    },
+    onError: (error) => {
+      console.error("Error:", error);
+      setTransactionInProgress(false);
+    },
   });
 
   function getRpcUrl() {
@@ -64,29 +87,10 @@ export default function Home() {
         return process.env.NEXT_PUBLIC_SEPOLIA_RPC;
       case "baseSepolia":
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
-
       default:
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
-
-//   const contractAddress = "0xf8FDa9e18ffe618Da320e316e75351FEdBE569c9";
-
-
-//   function CallContract() {
-//     console.log(`sending transaction to ...${contractAddress}`);
-//     sendUserOperation({
-//       uo: {
-//         target: contractAddress,
-//         data: encodeFunctionData({
-//           abi: ABI,
-//           functionName: "place_Order",
-//           args: ["0002", "1", "FirstOrder", "001"],
-//         }),
-//         value: ethers.parseEther("0.002"),
-//       },
-//     });
-//   }
 
   function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
@@ -124,7 +128,6 @@ export default function Home() {
     const selected = e.target.value as ChainType;
 
     if (selected !== selectedChain) {
-      // Prevent duplicate state updates
       setSelectedChain(selected);
 
       if (selected === "baseSepolia") {
@@ -137,11 +140,13 @@ export default function Home() {
     }
   }
 
+
   async function sendTokens() {
     if (!isValidAddress(inputAddress)) {
       alert("Invalid Ethereum address");
       return;
     }
+    setStartTime(new Date().getTime()); // Set the start time
 
     console.log("Estimating gas...");
     const rpcUrl = getRpcUrl();
@@ -158,8 +163,8 @@ export default function Home() {
       console.log(
         `Estimated Gas: ${ethers.formatUnits(gasEstimate, "gwei")} Gwei`
       );
+      setTransactionInProgress(true);
 
-      // Proceed to send tokens
       sendUserOperation({
         uo: {
           target: inputAddress as `0x${string}`,
@@ -169,9 +174,11 @@ export default function Home() {
       });
     } catch (error) {
       console.error("Error estimating gas:", error);
-      setEstimatedGas(""); // Reset if there's an error
+      setEstimatedGas("");
+      setTransactionInProgress(false);
     }
   }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
       {signerStatus.isInitializing ? (
@@ -219,14 +226,50 @@ export default function Home() {
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-          <p className="mt-2">
-            Estimated Gas: {estimatedGas ? `${estimatedGas} Gwei` : "N/A"}
-          </p>
+		  <h1>if you not have passkey then generate</h1>
+          <button
+            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
+            disabled={isAddingPasskey}
+            onClick={() => {
+				addPasskey();
+            }}
+          >
+            Add Passkey
+          </button>
+          {isTransactionInProgress && (
+            <p className="mt-2 text-gray-600 font-medium">
+              Estimated Gas: {estimatedGas} Gwei
+            </p>
+          )}
+          {transactionTime && (
+            <p className="mt-2 text-green-600 font-medium">
+              Transaction completed in {transactionTime}
+            </p>
+          )}
+          {transactionHash && (
+            <div
+              className="mt-2 p-2 bg-gray-200 rounded overflow-x-auto w-full"
+              style={{ wordBreak: "break-word" }}
+            >
+              <p className="text-blue-600 font-medium">
+                Transaction Hash:{" "}
+               
+                  {transactionHash}
+            
+              </p>
+            </div>
+          )}
           <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
-            contract Interaction
+            Contract Interaction
+          </button>
+          <button
+            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
+            onClick={handleClickGas}
+          >
+            With Own Gas
           </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
@@ -239,7 +282,7 @@ export default function Home() {
         <button
           className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
           onClick={openAuthModal}
-          disabled={isSendingUserOperation}
+          disabled={isSettingChain}
         >
           Login
         </button>

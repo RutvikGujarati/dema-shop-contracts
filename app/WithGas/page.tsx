@@ -10,12 +10,7 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useChain } from "@account-kit/react";
-import {
-  baseSepolia,
-  sepolia,
-  polygonAmoy,
-} from "@account-kit/infra";
-import Gas from "@/components/Gas";
+import { baseSepolia, sepolia, polygonAmoy } from "@account-kit/infra";
 
 export default function Home() {
   const user = useUser();
@@ -66,12 +61,15 @@ export default function Home() {
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
+
   const handleClick = () => {
     window.location.href = "/";
   };
+
   function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
   }
+
   useEffect(() => {
     console.log("Selected Chain:", selectedChain);
     console.log("RPC URL:", getRpcUrl());
@@ -216,12 +214,6 @@ export default function Home() {
             </p>
           )}
 
-          {transactionStatus === "completed" && (
-            <p className="text-green-500 font-semibold mt-2">
-              🎉 Transaction Successful! Hash: {tHash}
-            </p>
-          )}
-
           {transactionStatus === "failed" && (
             <p className="text-red-500 font-semibold mt-2">
               ⚠️ Transaction failed. Please try again.
@@ -235,17 +227,14 @@ export default function Home() {
           )}
 
           {tHash && (
-            <p className="mt-2 text-gray-100">
-              Transaction Hash:{" "}
-              <a
-                href={`https://sepolia.etherscan.io/tx/${tHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline hover:text-blue-500 transition-colors"
-              >
-                {tHash}
-              </a>
-            </p>
+            <div
+              className="mt-2 p-2 bg-gray-200 rounded overflow-x-auto w-full"
+              style={{ wordBreak: "break-word" }}
+            >
+              <p className="text-blue-600 font-medium">
+                Transaction Hash: {tHash}
+              </p>
+            </div>
           )}
           <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
@@ -262,11 +251,10 @@ export default function Home() {
         </div>
       ) : (
         <button
-          className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          onClick={openAuthModal}
-          disabled={isSendingUserOperation}
+          className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition"
+          onClick={() => openAuthModal()}
         >
-          Login
+          Log In
         </button>
       )}
     </main>

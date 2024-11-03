@@ -96,3 +96,49 @@ body {
 	cursor: pointer;
   }
   
+  .auth-modal {
+	background-color: #f0f0f0; /* Customize background */
+	color: #333; /* Customize text color */
+	border-radius: 10px; /* Adjust border radius */
+  }
+  .auth-modal button {
+	background-color: #4a90e2; /* Customize button color */
+	border-radius: 5px;
+  }
+  
+  .advanced-card {
+	width: 100%;
+	max-width: 600px; /* Wider card to fit larger addresses */
+	border-radius: 12px;
+	box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+	background-color: #f9f9f9;
+	padding: 2rem;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .advanced-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .advanced-card p span {
+	display: inline-block;
+	text-align: center;
+	word-break: break-all;
+	color: #374151;
+	font-weight: bold;
+  }
+  
+  .input-field {
+	padding: 0.5rem;
+	width: 100%;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .input-field:focus {
+	border-color: #3b82f6;
+	box-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
+  }
+ 

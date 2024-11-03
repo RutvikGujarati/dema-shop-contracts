@@ -1,11 +1,19 @@
 "use client";
 import {
   useAuthModal,
+  useChain,
   useLogout,
   useSignerStatus,
   useSmartAccountClient,
   useUser,
 } from "@account-kit/react";
+import {
+  baseSepolia,
+  optimismSepolia,
+  polygon,
+  sepolia,
+  polygonAmoy,
+} from "@account-kit/infra";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useSendUserOperation } from "@account-kit/react";
@@ -13,14 +21,30 @@ import ABI from "./ABI.json";
 import { encodeFunctionData } from "viem";
 
 export default function Home() {
+	const [transactionHash, setTransactionHash] = useState("");
+
   const user = useUser();
   const { openAuthModal } = useAuthModal();
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
+
+  const { chain, setChain, isSettingChain } = useChain();
+
+  const policyIdMapping = {
+    polygonAmoy: process.env.NEXT_PUBLIC_POLYGON_POLICY_ID,
+    sepolia: process.env.NEXT_PUBLIC_SEPOLIA_POLICY_ID,
+    baseSepolia: process.env.NEXT_PUBLIC_BASE_SEPOLIA_POLICY_ID,
+  };
+
+  type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
+
+  const [selectedChain, setSelectedChain] = useState<ChainType>("baseSepolia");
+
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
-    policyId: process.env.NEXT_PUBLIC_POLICY_ID,
+    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], 
   });
+
 
   const handleClick = () => {
     window.location.href = "/";
@@ -31,6 +55,8 @@ export default function Home() {
     waitForTxn: true,
     onSuccess: ({ hash }) => {
       console.log(hash);
+	  setTransactionHash(hash);
+
       console.log("success");
     },
     onError: (error) => {
@@ -52,9 +78,9 @@ export default function Home() {
         data: encodeFunctionData({
           abi: ABI,
           functionName: "place_Order",
-          args: [amount, requestId, orderDesc, userId],
+          args: [ethers.parseEther(amount), requestId, orderDesc, userId],
         }),
-        value: ethers.parseEther(value),
+        value: ethers.parseEther(amount),
       },
     });
   }
@@ -69,12 +95,16 @@ export default function Home() {
             Logged in as:{" "}
             <span className="font-semibold">{address ?? "anon"}</span>.
           </p>
+          <div>
+            <p>Current Chain ID: {chain?.id}</p>
+            <p>Current Chain Name: {chain?.name}</p>
+          </div>
 
           <h3 className="text-lg font-semibold">Place Order</h3>
 
           <input
             type="text"
-            placeholder="Amount (e.g., 2)"
+            placeholder="Amount (e.g., 0.002)"
             className="input-field"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -103,13 +133,13 @@ export default function Home() {
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
           />
-          <input
+          {/* <input
             type="text"
             placeholder="Eth amount(e.g., 0.001)"
             className="input-field "
             value={value}
             onChange={(e) => setValue(e.target.value)}
-          />
+          /> */}
 
           <button
             className="flex flex-col btn btn-primary items-center"
@@ -118,7 +148,20 @@ export default function Home() {
           >
             Place Order
           </button>
-		  <button
+		  {transactionHash && (
+            <div
+              className="mt-2 p-2 bg-gray-200 rounded overflow-x-auto w-full"
+              style={{ wordBreak: "break-word" }}
+            >
+              <p className="text-blue-600 font-medium">
+                Transaction Hash:{" "}
+               
+                  {transactionHash}
+            
+              </p>
+            </div>
+          )}
+          <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
