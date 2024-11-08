@@ -1,6 +1,6 @@
 "use client";
 import {
-	useAddPasskey,
+  useAddPasskey,
   useAuthModal,
   useLogout,
   useSendUserOperation,
@@ -21,7 +21,7 @@ import {
 import ABI from "./ContractCall/ABI.json";
 
 export default function Home() {
-	const { addPasskey, isAddingPasskey } = useAddPasskey();
+  const { addPasskey, isAddingPasskey } = useAddPasskey();
 
   const user = useUser();
   const { openAuthModal } = useAuthModal();
@@ -48,7 +48,7 @@ export default function Home() {
   const policyIdMapping = {
     polygonAmoy: process.env.NEXT_PUBLIC_POLYGON_POLICY_ID,
     sepolia: process.env.NEXT_PUBLIC_SEPOLIA_POLICY_ID,
-    baseSepolia: process.env.NEXT_PUBLIC_BASE_SEPOLIA_POLICY_ID,
+    baseSepolia: process.env.NEXT_PUBLIC_POLICY_ID,
   };
 
   const { client, address } = useSmartAccountClient({
@@ -140,7 +140,6 @@ export default function Home() {
     }
   }
 
-
   async function sendTokens() {
     if (!isValidAddress(inputAddress)) {
       alert("Invalid Ethereum address");
@@ -178,6 +177,22 @@ export default function Home() {
       setTransactionInProgress(false);
     }
   }
+
+  const handleClickAPI = async () => {
+	let data ={
+		name: "rutvik",
+		Surname:"gujarati"
+	}
+    let variable = await fetch("/api/test", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+	let res = await variable.json()
+	console.log(res)
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
@@ -226,12 +241,12 @@ export default function Home() {
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-		  <h1>if you not have passkey then generate</h1>
+          <h1>if you not have passkey then generate</h1>
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             disabled={isAddingPasskey}
             onClick={() => {
-				addPasskey();
+              addPasskey();
             }}
           >
             Add Passkey
@@ -252,10 +267,7 @@ export default function Home() {
               style={{ wordBreak: "break-word" }}
             >
               <p className="text-blue-600 font-medium">
-                Transaction Hash:{" "}
-               
-                  {transactionHash}
-            
+                Transaction Hash: {transactionHash}
               </p>
             </div>
           )}
@@ -270,6 +282,12 @@ export default function Home() {
             onClick={handleClickGas}
           >
             With Own Gas
+          </button>
+          <button
+            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
+            onClick={handleClickAPI}
+          >
+            api
           </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"

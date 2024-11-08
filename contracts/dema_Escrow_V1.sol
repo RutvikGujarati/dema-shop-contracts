@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 contract dema_Escrow_V1 {
     struct Order {
-        uint128 amount; // Price (in smallest token unit) divided by 100
+        uint128 amount; // Price (in smallest token unit24)
         uint16 requestId; // Number of Orders
         bytes16 requestHash; // 128-bit hash to uniquely identify an order
         uint32 userId; // User ID
