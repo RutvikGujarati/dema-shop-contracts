@@ -3651,13 +3651,6 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
-"@types/secp256k1@^4.0.6":
-  version "4.0.6"
-  resolved "https://registry.npmjs.org/@types/secp256k1/-/secp256k1-4.0.6.tgz"
-  integrity sha512-hHxJU6PAEUn0TP4S/ZOzuTUvJWuZ6eIKeNKb5RBpODvSl6hp1Wrw4s7ATY50rklRCScUDpHzVA/DQdSjJ3UoYQ==
-  dependencies:
-    "@types/node" "*"
-
 "@types/stack-utils@^2.0.0":
   version "2.0.3"
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.3.tgz"
@@ -3742,6 +3735,27 @@
   version "1.2.0"
   resolved "https://registry.npmjs.org/@ungap/structured-clone/-/structured-clone-1.2.0.tgz"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
+
+"@upstash/redis@^1.28.4":
+  version "1.34.3"
+  resolved "https://registry.npmjs.org/@upstash/redis/-/redis-1.34.3.tgz"
+  integrity sha512-VT25TyODGy/8ljl7GADnJoMmtmJ1F8d84UXfGonRRF8fWYJz7+2J6GzW+a6ETGtk4OyuRTt7FRSvFG5GvrfSdQ==
+  dependencies:
+    crypto-js "^4.2.0"
+
+"@upstash/redis@1.25.1":
+  version "1.25.1"
+  resolved "https://registry.npmjs.org/@upstash/redis/-/redis-1.25.1.tgz"
+  integrity sha512-ACj0GhJ4qrQyBshwFgPod6XufVEfKX2wcaihsEvSdLYnY+m+pa13kGt1RXm/yTHKf4TQi/Dy2A8z/y6WUEOmlg==
+  dependencies:
+    crypto-js "^4.2.0"
+
+"@vercel/kv@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@vercel/kv/-/kv-1.0.1.tgz"
+  integrity sha512-uTKddsqVYS2GRAM/QMNNXCTuw9N742mLoGRXoNDcyECaxEXvIHG0dEY+ZnYISV4Vz534VwJO+64fd9XeSggSKw==
+  dependencies:
+    "@upstash/redis" "1.25.1"
 
 "@wagmi/connectors@^5.1.15":
   version "5.3.3"
@@ -5239,6 +5253,11 @@ crossws@^0.2.0, crossws@^0.2.4:
   resolved "https://registry.npmjs.org/crossws/-/crossws-0.2.4.tgz"
   integrity sha512-DAxroI2uSOgUKLz00NX6A8U/8EE3SZHmIND+10jkVSaypvyt57J5JEOxAQOL6lQxyzi/wZbTIwssU1uy69h5Vg==
 
+crypto-js@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/crypto-js/-/crypto-js-4.2.0.tgz"
+  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
+
 css.escape@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/css.escape/-/css.escape-1.5.1.tgz"
@@ -5567,13 +5586,12 @@ eastasianwidth@^0.2.0:
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
 eciesjs@^0.3.15, eciesjs@^0.3.16:
-  version "0.3.20"
-  resolved "https://registry.npmjs.org/eciesjs/-/eciesjs-0.3.20.tgz"
-  integrity sha512-Rz5AB8v9+xmMdS/R7RzWPe/R8DP5QfyrkA6ce4umJopoB5su2H2aDy/GcgIfwhmCwxnBkqGf/PbGzmKcGtIgGA==
+  version "0.3.21"
+  resolved "https://registry.npmjs.org/eciesjs/-/eciesjs-0.3.21.tgz"
+  integrity sha512-6FiThm7KlTihph8ROhq/BHEglGCJSwq6c8KVgcCcJiNJFNlbrFtfnTqZobVmWIB764mzhZTOBFyinADSXXvTLg==
   dependencies:
-    "@types/secp256k1" "^4.0.6"
     futoin-hkdf "^1.5.3"
-    secp256k1 "^5.0.0"
+    secp256k1 "^5.0.1"
 
 eciesjs@^0.4.8:
   version "0.4.10"
@@ -5602,7 +5620,7 @@ electron-to-chromium@^1.5.41:
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.50.tgz"
   integrity sha512-eMVObiUQ2LdgeO1F/ySTXsvqvxb6ZH2zPGaMYsWzRDdOddUa77tdmI0ltg+L16UpbWdhPmuF3wIQYyQq65WfZw==
 
-elliptic@^6.5.4, elliptic@^6.5.5, elliptic@^6.5.7:
+elliptic@^6.5.5, elliptic@^6.5.7:
   version "6.5.7"
   resolved "https://registry.npmjs.org/elliptic/-/elliptic-6.5.7.tgz"
   integrity sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==
@@ -9935,12 +9953,12 @@ scrypt-js@3.0.1:
   resolved "https://registry.npmjs.org/scrypt-js/-/scrypt-js-3.0.1.tgz"
   integrity sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==
 
-secp256k1@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npmjs.org/secp256k1/-/secp256k1-5.0.0.tgz"
-  integrity sha512-TKWX8xvoGHrxVdqbYeZM9w+izTF4b9z3NhSaDkdn81btvuh+ivbIMGT/zQvDtTFWhRlThpoz6LEYTr7n8A5GcA==
+secp256k1@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.npmjs.org/secp256k1/-/secp256k1-5.0.1.tgz"
+  integrity sha512-lDFs9AAIaWP9UCdtWrotXWWF9t8PWgQDcxqgAnpM9rMqxb3Oaq2J0thzPVSxBwdJgyQtkU/sYtFtbM1RSt/iYA==
   dependencies:
-    elliptic "^6.5.4"
+    elliptic "^6.5.7"
     node-addon-api "^5.0.0"
     node-gyp-build "^4.2.0"
 
@@ -10827,6 +10845,7 @@ ufo@^1.4.0, ufo@^1.5.3:
     "@testing-library/jest-dom" "^6.6.2"
     "@testing-library/react" "^16.0.1"
     "@testing-library/user-event" "^14.5.2"
+    "@vercel/kv" "^1.0.1"
     aes-js "^3.1.2"
     bcryptjs "^2.4.3"
     emailjs-com "^3.2.0"

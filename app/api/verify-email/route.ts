@@ -3,12 +3,10 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 
 const TOKEN_FILE_PATH = "tokens.json";
-const EMAIL_FILE_PATH = "emails.json";
 
-export const tokens: Record<string, { email: string; expiration: number }> =
+ const tokens: Record<string, { email: string; expiration: number }> =
   loadTokensFromFile();
-export const emails: Record<string, { email: string }> =
-  loadEmails();
+
 
 const generateVerificationToken = () =>
   Math.random().toString(36).substr(2, 16);
@@ -21,14 +19,7 @@ function loadTokensFromFile() {
     return {};
   }
 }
-function loadEmails() {
-  try {
-    const data = fs.readFileSync(EMAIL_FILE_PATH, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    return {};
-  }
-}
+
 
 function storeTokenToFile(token: string, email: string) {
   tokens[token] = {
@@ -36,10 +27,6 @@ function storeTokenToFile(token: string, email: string) {
     expiration: Date.now() + 1000 * 60 * 15, // 15-minute expiration
   };
   fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokens, null, 2));
-}
-function storeEmailsToFile( email: string) {
-  email;
-  fs.writeFileSync(EMAIL_FILE_PATH, JSON.stringify(email, null, 2));
 }
 
 // POST handler
@@ -56,9 +43,8 @@ export async function POST(req: Request) {
   // Generate a new token and store it
   const token = generateVerificationToken();
   storeTokenToFile(token, email);
-  storeEmailsToFile(email);
 
-  console.log("Stored tokens:", tokens); // Log tokens for debugging
+  console.log("Stored tokens:", tokens); 
 
   // Set up email transport
   const transporter = nodemailer.createTransport({
@@ -70,7 +56,7 @@ export async function POST(req: Request) {
   });
 
   // Send the verification email
-  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
+  const verificationLink = `${process.env.NEXT_PUBLIC_API_URL}/verify-email?token=${token}`;
   await transporter.sendMail({
     from: '"Dema Verification"',
     to: email,

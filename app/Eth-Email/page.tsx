@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useRouter } from "next/router";
 
 const Home = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +8,7 @@ const Home = () => {
   const [address, setAddress] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [LoginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
 
@@ -49,7 +49,12 @@ const Home = () => {
       localStorage.setItem("address", userAddress);
       localStorage.setItem("signature", userSignature);
 
-      const res = await fetch("/api/verify-siwe", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error("API URL is not defined.");
+      }
+      console.log(apiUrl);
+      const res = await fetch(`${apiUrl}/api/verify-siwe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,11 +86,23 @@ const Home = () => {
     setError(null);
 
     try {
-      const res = await fetch("/api/verify-email", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error("API URL is not defined.");
+      }
+      console.log(apiUrl);
+
+      const res = await fetch(`${apiUrl}/api/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address, email }),
       });
+
+      // Log status and check for errors
+      console.log("Response status:", res.status);
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
 
       const data = await res.json();
       if (data.success) {
@@ -94,8 +111,12 @@ const Home = () => {
         setError("Error sending verification email.");
       }
     } catch (error) {
-      console.error("Error during email submission:", error);
-      setError("An error occurred while sending email.");
+      if (error instanceof TypeError && error.message === "Failed to fetch") {
+        setError("Network error: Could not reach server.");
+      } else {
+        console.error("Error during email submission:", error);
+        setError("An error occurred while sending email.");
+      }
     } finally {
       setLoading(false);
     }
@@ -103,21 +124,28 @@ const Home = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoginLoading(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/login-email", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error("API URL is not defined.");
+      }
+      console.log("url for api",apiUrl);
+      const res = await fetch(`${apiUrl}/api/login-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ Loginemail }),
       });
 
       const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("authenticatedEmail", email);
+
+      if (res.ok && data.success) {
         alert("Login successful!");
         window.location.href = "/Dashboard";
+      } else if (data.message) {
+        setError(data.message);
       } else {
         setError("Email not verified. Please verify your email first.");
       }
@@ -125,7 +153,7 @@ const Home = () => {
       console.error("Error during email login:", error);
       setError("An error occurred during email login.");
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
 
@@ -152,7 +180,9 @@ const Home = () => {
             Login
           </button>
           <p>OR</p>
-          <p className="text-lg font-medium">Add email for verification</p>
+          <p className="text-lg font-medium">
+            Add Backup email for verification
+          </p>
 
           <form
             onSubmit={handleEmailSubmit}
@@ -189,9 +219,10 @@ const Home = () => {
             />
             <button
               type="submit"
+              disabled={LoginLoading}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded transition"
             >
-              {"Sign in using Backup Email"}
+              {LoginLoading ? "Sign in...." : "Sign in using Backup Email"}
             </button>
           </form>
 

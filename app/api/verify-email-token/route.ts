@@ -3,6 +3,7 @@ import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
 const TOKEN_FILE_PATH = path.join(process.cwd(), "tokens.json");
+const EMAIL_FILE_PATH = path.join(process.cwd(), "emails.json");
 
 function loadTokensFromFile() {
   try {
@@ -14,24 +15,35 @@ function loadTokensFromFile() {
   }
 }
 
-function saveTokensToFile(
-  tokens: Record<string, { email: string; expiration: number }>
-) {
-  fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokens, null, 2));
-}
+function loadEmailsFromFile(): string[] {
+	try {
+	  const data = fs.readFileSync(EMAIL_FILE_PATH, "utf-8");
+	  const parsedData = JSON.parse(data);
+	  return Array.isArray(parsedData.verifiedEmails) ? parsedData.verifiedEmails : [];
+	} catch (error) {
+	  console.error("Error reading emails file:", error);
+	  return [];
+	}
+  }
+  
 
-function verifyToken(token: string) {
+function saveEmailsToFile(emails: string[]) {
+	const data = { verifiedEmails: emails };
+	fs.writeFileSync(EMAIL_FILE_PATH, JSON.stringify(data, null, 2));
+  }
+  
+
+function verifyToken(token: any) {
   const tokens = loadTokensFromFile();
   const storedToken = tokens[token];
 
-  console.log("Available tokens:", tokens);
   if (!storedToken) {
     return { success: false, message: "Invalid token" };
   }
 
   if (storedToken.expiration < Date.now()) {
     delete tokens[token];
-    saveTokensToFile(tokens);
+    fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokens, null, 2));
     return { success: false, message: "Token has expired" };
   }
 
@@ -50,9 +62,21 @@ export async function GET(req: NextRequest) {
   }
 
   const result = verifyToken(token);
+
   if (result.success) {
+    const verifiedEmails = loadEmailsFromFile();
+
+    if (!verifiedEmails.includes(result.email)) {
+      verifiedEmails.push(result.email); 
+      saveEmailsToFile(verifiedEmails); 
+    }
+
     return NextResponse.json(
-      { success: true, message: "Token verification successful." },
+      {
+        success: true,
+        email: result.email,
+        message: "Token verification successful.",
+      },
       { status: 200 }
     );
   } else {

@@ -25,7 +25,10 @@ export default function Home() {
 
   const [selectedChain, setSelectedChain] = useState<ChainType>("baseSepolia");
 
-  const { client, address } = useSmartAccountClient({ type: "LightAccount" });
+  const { client, address } = useSmartAccountClient({
+    type: "LightAccount",
+    accountParams: {},
+  });
 
   const [inputAddress, setInputAddress] = useState("");
   const [value, setValue] = useState("0");
@@ -161,7 +164,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-black-500 to-indigo-800 text-white">
       {signerStatus.isInitializing ? (
         <p className="text-2xl font-semibold animate-pulse">Loading...</p>
       ) : user ? (

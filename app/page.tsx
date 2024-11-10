@@ -1,6 +1,7 @@
 "use client";
 import {
   useAddPasskey,
+  useAuthenticate,
   useAuthModal,
   useLogout,
   useSendUserOperation,
@@ -11,17 +12,22 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useChain } from "@account-kit/react";
+import { AlchemyWebSigner } from "@account-kit/signer";
 import {
-  baseSepolia,
-  optimismSepolia,
-  polygon,
-  sepolia,
-  polygonAmoy,
-} from "@account-kit/infra";
+  createBundlerClient,
+  createSmartAccountClientFromExisting,
+} from "@aa-sdk/core";
+
+import { baseSepolia, sepolia, polygonAmoy, alchemy } from "@account-kit/infra";
 import ABI from "./ContractCall/ABI.json";
+import { createLightAccountAlchemyClient, getSigner } from "@account-kit/core";
+import { config } from "@/config";
+import CreateSigner from "./signer";
 
 export default function Home() {
-  const { addPasskey, isAddingPasskey } = useAddPasskey();
+  //   const { addPasskey, isAddingPasskey } = useAddPasskey();
+
+  const { authenticate, isPending } = useAuthenticate();
 
   const user = useUser();
   const { openAuthModal } = useAuthModal();
@@ -38,7 +44,7 @@ export default function Home() {
     window.location.href = "/ContractCall";
   };
   const handleClickGas = () => {
-    window.location.href = "/WithGas";
+    window.location.href = "/Eth-Email";
   };
 
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
@@ -91,6 +97,14 @@ export default function Home() {
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
+
+  const { signer, loginWithGoogle } = CreateSigner(config);
+
+  useEffect(() => {
+    if (signer) {
+      console.log("Signer initialized:", signer);
+    }
+  }, [signer]);
 
   function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
@@ -179,10 +193,10 @@ export default function Home() {
   }
 
   const handleClickAPI = async () => {
-	let data ={
-		name: "rutvik",
-		Surname:"gujarati"
-	}
+    let data = {
+      name: "rutvik",
+      Surname: "gujarati",
+    };
     let variable = await fetch("/api/test", {
       method: "POST",
       headers: {
@@ -190,12 +204,12 @@ export default function Home() {
       },
       body: JSON.stringify(data),
     });
-	let res = await variable.json()
-	console.log(res)
+    let res = await variable.json();
+    console.log(res);
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-black-500 text-white">
       {signerStatus.isInitializing ? (
         <p className="text-2xl font-semibold animate-pulse">Loading...</p>
       ) : user ? (
@@ -241,7 +255,7 @@ export default function Home() {
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-          <h1>if you not have passkey then generate</h1>
+          {/* <h1>if you not have passkey then generate</h1>
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             disabled={isAddingPasskey}
@@ -250,7 +264,7 @@ export default function Home() {
             }}
           >
             Add Passkey
-          </button>
+          </button> */}
           {isTransactionInProgress && (
             <p className="mt-2 text-gray-600 font-medium">
               Estimated Gas: {estimatedGas} Gwei
@@ -271,23 +285,26 @@ export default function Home() {
               </p>
             </div>
           )}
-          <button
+          {/* <button 	
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClick}
           >
             Contract Interaction
-          </button>
-          <button
+          </button> */}
+          {/* <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={handleClickGas}
           >
-            With Own Gas
+            sign in with EOA
           </button>
+           */}
+          <h1>OR Add Sign in methods for your SCA</h1>
+
           <button
-            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
-            onClick={handleClickAPI}
+            onClick={loginWithGoogle}
+            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
           >
-            api
+            Google Login (Popup)
           </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
@@ -302,7 +319,7 @@ export default function Home() {
           onClick={openAuthModal}
           disabled={isSettingChain}
         >
-          Login
+          Sign Up
         </button>
       )}
     </main>

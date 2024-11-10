@@ -15,10 +15,8 @@ import { config } from "@/config";
 import { getSigner, watchSignerStatus } from "@account-kit/core";
 import { AlchemyWebSigner } from "@account-kit/signer";
 
-import EmailVerificationComponent from "@/components/Email";
 
 const Home = () => {
-  const { addPasskey, isAddingPasskey } = useAddPasskey();
   const user = useUser();
   const signerStatus = useSignerStatus();
   const [processing, setProcessing] = useState(false);
@@ -32,7 +30,6 @@ const Home = () => {
     const initializeSigner = async () => {
       if (typeof window === "undefined") return;
 
-      // Wait a short time for the client to be fully ready
       await new Promise((resolve) => setTimeout(resolve, 50));
       const signerInstance = getSigner(config);
 
@@ -64,7 +61,7 @@ const Home = () => {
         type: "passkey",
 		email:email,
         // createNew: true,
-		// username: email,
+		username: email,
       });
       setAuthenticated(true);
       console.log("Authentication successful");
@@ -87,7 +84,6 @@ const Home = () => {
             </span>
           </p>
           <div className="flex flex-col items-stretch w-full">
-            <EmailVerificationComponent />
           </div>
           <button
             className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"

@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ethers } from "ethers";
+import { NextRequest, NextResponse } from 'next/server';
+import { ethers } from 'ethers';
 
-const SIGN_IN_MESSAGE = "Sign this message to authenticate your login.";
+const SIGN_IN_MESSAGE = 'Sign this message to authenticate your login.';
 
 export async function POST(request: NextRequest) {
   const { address, signature } = await request.json();
-  console.log("Received data:", { address, signature });
+  console.log('Received data:', { address, signature });
 
   if (!address || !signature) {
     return NextResponse.json(
-      { success: false, message: "Address and signature are required." },
+      { success: false, message: 'Address and signature are required.' },
       { status: 400 }
     );
   }
@@ -20,19 +20,19 @@ export async function POST(request: NextRequest) {
     if (recoveredAddress.toLowerCase() === address.toLowerCase()) {
       return NextResponse.json({
         success: true,
-        message: "Authentication successful.",
-        from: "verify-siwe API",
+        message: 'Authentication successful.',
+        from: 'verify-siwe API',
       });
     } else {
       return NextResponse.json(
-        { success: false, message: "Signature verification failed." },
+        { success: false, message: 'Signature verification failed.' },
         { status: 400 }
       );
     }
   } catch (error) {
-    console.error("Error verifying signature:", error);
+    console.error('Error verifying signature:', error);
     return NextResponse.json(
-      { success: false, message: "Internal server error." },
+      { success: false, message: 'Internal server error.' },
       { status: 500 }
     );
   }

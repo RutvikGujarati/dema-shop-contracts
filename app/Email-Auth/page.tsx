@@ -1,6 +1,6 @@
 "use client";
 import {
-	useAddPasskey,
+  useAddPasskey,
   useAuthModal,
   useLogout,
   useSendUserOperation,
@@ -16,9 +16,10 @@ import { getSigner } from "@account-kit/core";
 import { AlchemyWebSigner } from "@account-kit/signer";
 
 export default function Home() {
-	const { addPasskey, isAddingPasskey } = useAddPasskey();
+  const { addPasskey, isAddingPasskey } = useAddPasskey();
 
   const user = useUser();
+  const [email, setEmail] = useState("");
   const { openAuthModal } = useAuthModal();
   const signerStatus = useSignerStatus();
   const [processing, setProcessing] = useState(false);
@@ -121,7 +122,7 @@ export default function Home() {
     try {
       await signer.authenticate({
         type: "email",
-        email: "gujaratirutvik007@gmail.com",
+        email: email,
       });
       console.log("Email link sent for authentication");
       setProcessing(false);
@@ -152,7 +153,7 @@ export default function Home() {
           >
             Log out
           </button>
-		  <button
+          <button
             disabled={isAddingPasskey}
             onClick={() => {
               addPasskey();
@@ -162,13 +163,22 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <button
-          className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition"
-          onClick={handleLoginWithEmail}
-          disabled={isSettingChain}
-        >
-          {processing ? "Processing..." : "Login With Email"}
-        </button>
+        <div className="">
+          <input
+            type="email"
+            placeholder="enter Email"
+            className="input-field w-full px-4 py-2 rounded-lg border text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />{" "}
+          <button
+            className="mt-3 btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition"
+            onClick={handleLoginWithEmail}
+            disabled={isSettingChain}
+          >
+            {processing ? "Processing..." : "Login With Email"}
+          </button>
+        </div>
       )}
     </main>
   );
