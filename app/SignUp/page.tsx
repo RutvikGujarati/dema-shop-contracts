@@ -19,11 +19,9 @@ import {
 } from "@aa-sdk/core";
 
 import { baseSepolia, sepolia, polygonAmoy, alchemy } from "@account-kit/infra";
-import ABI from "./ContractCall/ABI.json";
 import { createLightAccountAlchemyClient, getSigner } from "@account-kit/core";
 import { config } from "@/config";
-import CreateSigner from "./signer";
-
+import CreateSigner from "../signer";
 export default function Home() {
   //   const { addPasskey, isAddingPasskey } = useAddPasskey();
 
@@ -50,11 +48,6 @@ export default function Home() {
     baseSepolia: process.env.NEXT_PUBLIC_POLICY_ID,
   };
 
-  const { addPasskey, isAddingPasskey, error } = useAddPasskey({
-    onSuccess: () => {
-    },
-    onError: (error) => console.error(error),
-  });
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
     policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], // Type assertion
@@ -96,10 +89,13 @@ export default function Home() {
     }
   }
 
-  const { signer, loginWithGoogle, loginWithPassKey } = CreateSigner(
-    config,
-    user
-  );
+  const {
+    signer,
+    loginWithGoogle,
+    loginWithPassKey,
+    loginWithFacebook,
+    loginWithApple,
+  } = CreateSigner(config, user);
 
   useEffect(() => {
     if (signer) {
@@ -138,38 +134,6 @@ export default function Home() {
     if (!address) return;
     fetchBalance();
   }, [address, selectedChain]);
-
-  const [showAlert, setShowAlert] = useState(false);
-
-  const LoginWithPasskey = async () => {
-    if (!signer) {
-      console.log("Signer is not initialized");
-      return;
-    }
-
-    if (!user || !user.email) {
-      console.error("User or user email is not initialized in time");
-      return;
-    }
-
-    try {
-      await signer.authenticate({
-        type: "passkey",
-        email: user.email,
-        // createNew: true,
-        // username: user.email,
-      });
-
-      console.log("Login with passkey successful",user.userId);
-
-      setShowAlert(true);
-
-      // Automatically hide the alert after 3 seconds (optional)
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error: any) {
-      console.error("Failed to log in with Google:", error.message);
-    }
-  };
 
   function handleChainChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const selected = e.target.value as ChainType;
@@ -233,10 +197,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-6 p-8 bg-white rounded-lg shadow-lg text-gray-800 w-full max-w-lg">
           <p className="text-lg font-medium">
             Logged in as:{" "}
-            <div>
-              <span className="flex font-semibold">{address ?? "Gujarati"}</span>
-              <span className="mt-4 font-semibold">{user.email ?? "Gujarati"}</span>
-            </div>
+            <span className="font-semibold">{address ?? "anon"}</span>.
           </p>
           <p className="mt-2">Balance: {balance || "Fetching..."}</p>
           <div>
@@ -275,30 +236,20 @@ export default function Home() {
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-          <h1>if you not have passkey then generate to store SCA</h1>
+          {/* <h1>if you not have passkey then generate</h1>
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
+            disabled={isAddingPasskey}
             onClick={() => {
               addPasskey();
             }}
           >
             Add Passkey
-          </button>
-          <button
-            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
-            onClick={LoginWithPasskey}
-          >
-            Passkey
-          </button>
+          </button> */}
           {isTransactionInProgress && (
             <p className="mt-2 text-gray-600 font-medium">
               Estimated Gas: {estimatedGas} Gwei
             </p>
-          )}
-          {showAlert && (
-            <div className="alert alert-success">
-              Email has been successfully added as a backup!
-            </div>
           )}
           {transactionTime && (
             <p className="mt-2 text-green-600 font-medium">
@@ -328,14 +279,8 @@ export default function Home() {
             sign in with EOA
           </button>
            */}
-          <h1>OR Add Sign in methods for your SCA</h1>
+          {/* <h1>OR Add Sign in methods for your SCA</h1> */}
 
-          <button
-            onClick={loginWithGoogle}
-            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          >
-            Google Login (Popup)
-          </button>
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}
@@ -344,13 +289,34 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <button
-          className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          onClick={openAuthModal}
-          disabled={isSettingChain}
-        >
-          Sign Up
-        </button>
+        <>
+          <button
+            onClick={loginWithGoogle}
+            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
+          >
+            Google SignUp/login
+          </button>
+          <button
+            onClick={loginWithFacebook}
+            className="mt-4 btn btn-primary bg-green-500
+			 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
+          >
+            facebook
+          </button>
+          <button
+            onClick={loginWithApple}
+            className="mt-4 btn btn-primary bg-green-500
+			 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
+          >
+            apple
+          </button>
+          {/* <button
+		onClick={loginWithPassKey}
+		className="mt-4 btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
+	  >
+		Passkey login
+	  </button> */}
+        </>
       )}
     </main>
   );

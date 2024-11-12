@@ -55,7 +55,7 @@ export default function Home() {
 
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
-    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], // Type assertion
+    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping],
   });
 
   const contractAddress = "0xf8FDa9e18ffe618Da320e316e75351FEdBE569c9";
