@@ -27,7 +27,6 @@ export default function Home() {
 
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
-    accountParams: {},
   });
 
   const [inputAddress, setInputAddress] = useState("");

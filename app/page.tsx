@@ -284,12 +284,12 @@ export default function Home() {
           >
             Add Passkey
           </button>
-          <button
+          {/* <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             onClick={LoginWithPasskey}
           >
             Passkey
-          </button>
+          </button> */}
           {isTransactionInProgress && (
             <p className="mt-2 text-gray-600 font-medium">
               Estimated Gas: {estimatedGas} Gwei
@@ -328,14 +328,14 @@ export default function Home() {
             sign in with EOA
           </button>
            */}
-          <h1>OR Add Sign in methods for your SCA</h1>
+          {/* <h1>OR Add Sign in methods for your SCA</h1> */}
 
-          <button
+          {/* <button
             onClick={loginWithGoogle}
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
           >
             Google Login (Popup)
-          </button>
+          </button> */}
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}

@@ -40,6 +40,86 @@ yarn dev
 npm run dev
 ```
 
+# Code Review Files:
+
+### [Page.tsx](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/page.tsx)
+
+- on this page user can send transaction to desire wallet Address or SCA.
+
+> [!NOTE]
+> user can also send ETH values with using gas policy or without Gas policy but it has currently issue with config of alchemy.
+
+```javascript
+const { client, address } = useSmartAccountClient({
+   type: "LightAccount",
+  - policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping]
+ });
+```
+
+- need to remove this policy to send transaction without using gas policy
+- user can also select chains that they want to send ETH amount.
+- **Review** :- Passkey adding to the current signed account to login next time using passkey to access that account.
+
+---
+
+### [SignUp](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/SignUp/page.tsx)
+
+- SignUp and login using Google, faceBook and apple on this page.
+
+> why created separate signup page?
+>
+> - cause of custom signup/login social
+
+1. if you are on localhost : `http://localhost:3000/SignUp`
+2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/SignUp`
+
+---
+
+### [Email-Auth](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/Email-Auth/page.tsx)
+
+- use custom sign in/ sign Up method using email magic link verification.
+- user can access their account using magic link sign in process.
+  Access that page using :
+
+1. if you are on localhost : `http://localhost:3000/Email-Auth`
+2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/Email-Auth`
+
+---
+
+### [ContractCall](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/ContractCall/page.tsx)
+
+- Send transaction to Contract with using User-Operation(SCA)
+  > [!note:]
+  > Currently working with gas policy
+
+1. if you are on localhost : `http://localhost:3000/ContractCall`
+2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/ContractCall`
+
+---
+
+### [Passkey](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/Passkey/page.tsx)
+
+- Custom page to use Passkey Authentication for sign the user to use SCA(smart contract Account)
+- if the User has Created Account and added Passkey authentication then user can sign in with this page.
+
+1. if you are on localhost : `http://localhost:3000/Passkey`
+2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/Passkey`
+
+---
+
+### [WithGas](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/WithGas/page.tsx)
+
+- As per alchemy docs we can able to send transaction using not initialize client with `gas policy`
+
+```javascript
+const { client, address } = useSmartAccountClient({
+  type: "LightAccount",
+});
+```
+- so, I have not initialize but, it is still using gas policy id from config.
+
+---
+
 ### Authentication
 
 - creating Auth sign up using alchemy **account-kit** @account-kit/react.
