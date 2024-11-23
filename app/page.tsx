@@ -9,6 +9,8 @@ import {
   useSmartAccountClient,
   useUser,
 } from "@account-kit/react";
+import authModule from "@/modules/auth"; // Importing the module
+
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useChain } from "@account-kit/react";
@@ -17,7 +19,7 @@ import {
   createBundlerClient,
   createSmartAccountClientFromExisting,
 } from "@aa-sdk/core";
-
+import useDemaAccountKit from "@/modules/functions/AccountInteraction";
 import { baseSepolia, sepolia, polygonAmoy, alchemy } from "@account-kit/infra";
 import ABI from "./ContractCall/ABI.json";
 import { createLightAccountAlchemyClient, getSigner } from "@account-kit/core";
@@ -27,43 +29,54 @@ import CreateSigner from "./signer";
 export default function Home() {
   //   const { addPasskey, isAddingPasskey } = useAddPasskey();
 
+  // alchemy hooks
   const { authenticate, isPending } = useAuthenticate();
 
   const user = useUser();
-  const { openAuthModal } = useAuthModal();
+  const { openAuthModal } = useDemaAccountKit();
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
   const { chain, setChain, isSettingChain } = useChain();
+
+  const [isPasskeyAdded, setIsPasskeyAdded] = useState(false);
+
+  const { addPasskey, isAddingPasskey, error } = useAddPasskey({
+    onSuccess: () => {
+      console.log("Passkey added successfully");
+
+      setIsPasskeyAdded(true);
+    },
+    onError: (error) => console.error(error),
+  });
+
   const [estimatedGas, setEstimatedGas] = useState("");
   const [isTransactionInProgress, setTransactionInProgress] = useState(false);
   const [transactionTime, setTransactionTime] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null); // State to track start time
+  const [inputAddress, setInputAddress] = useState("");
+  const [value, setValue] = useState("0");
+  const [balance, setBalance] = useState("");
 
+  //chain config
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
 
   const [selectedChain, setSelectedChain] = useState<ChainType>("baseSepolia");
 
+  // policy id
   const policyIdMapping = {
     polygonAmoy: process.env.NEXT_PUBLIC_POLYGON_POLICY_ID,
     sepolia: process.env.NEXT_PUBLIC_SEPOLIA_POLICY_ID,
     baseSepolia: process.env.NEXT_PUBLIC_POLICY_ID,
   };
 
-  const { addPasskey, isAddingPasskey, error } = useAddPasskey({
-    onSuccess: () => {
-    },
-    onError: (error) => console.error(error),
-  });
+  // smart account
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
-    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], // Type assertion
+    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping],
   });
 
-  const [inputAddress, setInputAddress] = useState("");
-  const [value, setValue] = useState("0");
-  const [balance, setBalance] = useState("");
-
+  //send transaction
   const { sendUserOperation, isSendingUserOperation } = useSendUserOperation({
     client,
     waitForTxn: true,
@@ -83,6 +96,7 @@ export default function Home() {
     },
   });
 
+  //config rpc urls
   function getRpcUrl() {
     switch (selectedChain) {
       case "polygonAmoy":
@@ -95,16 +109,22 @@ export default function Home() {
         return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
     }
   }
+  const handleSignUpPage = () => {
+    window.location.href = "/SignUp";
+  };
 
+  // initialize signer form signer page
   const { signer, loginWithGoogle, loginWithPassKey } = CreateSigner(
     config,
     user
   );
+  const createAccount = new authModule.CreateAccount();
 
   useEffect(() => {
     if (signer) {
       console.log("Signer initialized:", signer);
     }
+    console.log("use Address", user?.address);
   }, [signer]);
 
   function isValidAddress(address: string): boolean {
@@ -134,6 +154,11 @@ export default function Home() {
     }
   }
 
+  const handleAccount = async () => {
+    const userAddress = await createAccount.Account();
+    console.log("Fetched user address:", userAddress);
+  };
+
   useEffect(() => {
     if (!address) return;
     fetchBalance();
@@ -160,12 +185,9 @@ export default function Home() {
         // username: user.email,
       });
 
-      console.log("Login with passkey successful",user.userId);
+      console.log("Login with passkey successful", user.userId);
 
       setShowAlert(true);
-
-      // Automatically hide the alert after 3 seconds (optional)
-      setTimeout(() => setShowAlert(false), 3000);
     } catch (error: any) {
       console.error("Failed to log in with Google:", error.message);
     }
@@ -186,6 +208,7 @@ export default function Home() {
       }
     }
   }
+  console.log("user address", address);
 
   async function sendTokens() {
     if (!isValidAddress(inputAddress)) {
@@ -234,8 +257,12 @@ export default function Home() {
           <p className="text-lg font-medium">
             Logged in as:{" "}
             <div>
-              <span className="flex font-semibold">{address ?? "Gujarati"}</span>
-              <span className="mt-4 font-semibold">{user.email ?? "Gujarati"}</span>
+              <span className="flex font-semibold">
+                {address ?? "Gujarati"}
+              </span>
+              <span className="mt-4 font-semibold">
+                {user.email ?? "Gujarati"}
+              </span>
             </div>
           </p>
           <p className="mt-2">Balance: {balance || "Fetching..."}</p>
@@ -269,27 +296,37 @@ export default function Home() {
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
+
           <button
             className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
             onClick={sendTokens}
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-          <h1>if you not have passkey then generate to store SCA</h1>
+          <h1>if you not have passkey then generate to secure SCA</h1>
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             onClick={() => {
               addPasskey();
             }}
           >
-            Add Passkey
+            {isAddingPasskey ? "Adding Passkey..." : "Add Passkey"}
           </button>
-          {/* <button
-            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
-            onClick={LoginWithPasskey}
-          >
-            Passkey
-          </button> */}
+
+          {error && (
+            <p className="text-red-500 mt-2">
+              Failed to add passkey: {error.message}
+            </p>
+          )}
+
+          {isPasskeyAdded && (
+            <button
+              className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
+              onClick={LoginWithPasskey}
+            >
+              Add email to passkey
+            </button>
+          )}
           {isTransactionInProgress && (
             <p className="mt-2 text-gray-600 font-medium">
               Estimated Gas: {estimatedGas} Gwei
@@ -321,21 +358,7 @@ export default function Home() {
           >
             Contract Interaction
           </button> */}
-          {/* <button
-            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
-            onClick={handleClickGas}
-          >
-            sign in with EOA
-          </button>
-           */}
-          {/* <h1>OR Add Sign in methods for your SCA</h1> */}
 
-          {/* <button
-            onClick={loginWithGoogle}
-            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          >
-            Google Login (Popup)
-          </button> */}
           <button
             className="btn btn-primary mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}
@@ -344,13 +367,24 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <button
-          className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          onClick={openAuthModal}
-          disabled={isSettingChain}
-        >
-          Sign Up
-        </button>
+        <>
+          <button
+            className="btn btn-primary
+			 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400 mb-3 "
+            onClick={openAuthModal}
+            disabled={isSettingChain}
+          >
+            Sign in
+          </button>
+          <h1>Or</h1>
+          <button
+            className="btn btn-primary
+			 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400 mt-3"
+            onClick={handleSignUpPage}
+          >
+            Custom Sign in
+          </button>
+        </>
       )}
     </main>
   );

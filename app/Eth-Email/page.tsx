@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { createWalletClient, custom } from "viem";
+import { mainnet } from "viem/chains";
+import { WalletClientSigner } from "@aa-sdk/core";
+
 
 const Home = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +15,22 @@ const Home = () => {
   const [LoginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
+
+  (async () => {
+	const client = createWalletClient({
+	  chain: mainnet,
+	  transport: custom(window.ethereum!),
+	});
+  
+	const signer = new WalletClientSigner(client, "wallet");
+  
+	console.log("signer here", signer);
+  
+	// Await the address properly
+	const address = await signer.getAddress();
+	console.log("signer's address", address);
+  })();
+  
 
   useEffect(() => {
     const storedAddress = localStorage.getItem("address");

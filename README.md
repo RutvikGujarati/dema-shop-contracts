@@ -68,7 +68,7 @@ const { client, address } = useSmartAccountClient({
 
 > why created separate signup page?
 >
-> - cause of custom signup/login social
+> - cause of custom signup/login socials pages.
 
 1. if you are on localhost : `http://localhost:3000/SignUp`
 2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/SignUp`
@@ -89,8 +89,8 @@ const { client, address } = useSmartAccountClient({
 ### [ContractCall](https://github.com/RutvikGujarati/dema-shop-contracts/blob/main/app/ContractCall/page.tsx)
 
 - Send transaction to Contract with using User-Operation(SCA)
-  > [!note:]
-  > Currently working with gas policy
+> [!NOTE:]
+> Currently working with gas policy
 
 1. if you are on localhost : `http://localhost:3000/ContractCall`
 2. if you are on vercel page : `https://dema-shop-contracts.vercel.app/ContractCall`

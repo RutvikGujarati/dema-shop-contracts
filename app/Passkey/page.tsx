@@ -15,7 +15,6 @@ import { config } from "@/config";
 import { getSigner, watchSignerStatus } from "@account-kit/core";
 import { AlchemyWebSigner } from "@account-kit/signer";
 
-
 const Home = () => {
   const user = useUser();
   const signerStatus = useSignerStatus();
@@ -24,6 +23,7 @@ const Home = () => {
   const { chain, setChain, isSettingChain } = useChain();
   const [signer, setSigner] = useState<AlchemyWebSigner | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
+  const [userName, setUserName] = React.useState("");
   const [email, setEmail] = React.useState("");
 
   useEffect(() => {
@@ -44,10 +44,12 @@ const Home = () => {
     initializeSigner();
   }, []);
 
+  
   useEffect(() => {
     if (signer) {
       console.log("Signer initialized:", signer);
     }
+	console.log("user address",user?.address)
   }, [signer]);
 
   const completeAuthentication = async () => {
@@ -59,9 +61,44 @@ const Home = () => {
     try {
       await signer.authenticate({
         type: "passkey",
-		email:email,
-        // createNew: true,
-		username: email,
+        // email:email,
+        createNew: true,
+        username: userName,
+      });
+      setAuthenticated(true);
+      console.log("Authentication successful");
+    } catch (error) {
+      console.error("Error completing email authentication:", error);
+    }
+  };
+  const AttachEmail = async () => {
+    if (!signer) {
+      console.log("Signer not ready, delaying authentication...");
+      return;
+    }
+
+    try {
+      await signer.authenticate({
+        type: "passkey",
+        email: email,
+      });
+      console.log("Email Added successfully");
+    } catch (error) {
+      console.error("Error completing email authentication:", error);
+    }
+  };
+  const LoginWithPasskey = async () => {
+    if (!signer) {
+      console.log("Signer not ready, delaying authentication...");
+      return;
+    }
+
+    try {
+      await signer.authenticate({
+        type: "passkey",
+        // email:email,
+        createNew: false,
+        // username: email,
       });
       setAuthenticated(true);
       console.log("Authentication successful");
@@ -83,33 +120,52 @@ const Home = () => {
               {user?.address ?? "Gujarati"}
             </span>
           </p>
-          <div className="flex flex-col items-stretch w-full">
-          </div>
+          <div className="flex flex-col items-stretch w-full"></div>
           <button
             className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition"
             onClick={() => logout()}
           >
             Log out
           </button>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-8 w-full max-w-lg p-8 bg-white rounded-lg shadow-lg text-gray-800 advanced-card">
-          <h2 className="text-2xl font-bold">Login</h2>
-          <input
+		  <input
             type="email"
-			placeholder="enter Email"
+            placeholder="enter email"
             className="input-field w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
+            onClick={AttachEmail}
+          >
+           Attach Email
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-8 w-full max-w-lg p-8 bg-white rounded-lg shadow-lg text-gray-800 advanced-card">
+          <h2 className="text-2xl font-bold">Login / SignUp</h2>
+          <input
+            type="text"
+            placeholder="enter Username"
+            className="input-field w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+          <button
+            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             onClick={completeAuthentication}
+            disabled={isSettingChain}
+          >
+            {processing ? "Processing..." : "SignUp With Passkey"}
+          </button>
+          <h1>OR</h1>
+          <button
+            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
+            onClick={LoginWithPasskey}
             disabled={isSettingChain}
           >
             {processing ? "Processing..." : "Login With Passkey"}
           </button>
-          
         </div>
       )}
     </main>

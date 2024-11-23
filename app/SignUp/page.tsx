@@ -12,23 +12,13 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useChain } from "@account-kit/react";
-import { AlchemyWebSigner } from "@account-kit/signer";
-import {
-  createBundlerClient,
-  createSmartAccountClientFromExisting,
-} from "@aa-sdk/core";
-
-import { baseSepolia, sepolia, polygonAmoy, alchemy } from "@account-kit/infra";
-import { createLightAccountAlchemyClient, getSigner } from "@account-kit/core";
+import { baseSepolia, sepolia, polygonAmoy } from "@account-kit/infra";
 import { config } from "@/config";
 import CreateSigner from "../signer";
 export default function Home() {
-  //   const { addPasskey, isAddingPasskey } = useAddPasskey();
-
-  const { authenticate, isPending } = useAuthenticate();
+  const { addPasskey, isAddingPasskey } = useAddPasskey();
 
   const user = useUser();
-  const { openAuthModal } = useAuthModal();
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
   const { chain, setChain, isSettingChain } = useChain();
@@ -36,7 +26,7 @@ export default function Home() {
   const [isTransactionInProgress, setTransactionInProgress] = useState(false);
   const [transactionTime, setTransactionTime] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
-  const [startTime, setStartTime] = useState<number | null>(null); // State to track start time
+  const [startTime, setStartTime] = useState<number | null>(null); 
 
   type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
 
@@ -50,7 +40,7 @@ export default function Home() {
 
   const { client, address } = useSmartAccountClient({
     type: "LightAccount",
-    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], // Type assertion
+    policyId: policyIdMapping[selectedChain as keyof typeof policyIdMapping], 
   });
 
   const [inputAddress, setInputAddress] = useState("");
@@ -89,18 +79,24 @@ export default function Home() {
     }
   }
 
-  const {
-    signer,
-    loginWithGoogle,
-    loginWithPassKey,
-    loginWithFacebook,
-    loginWithApple,
-  } = CreateSigner(config, user);
+  const { signer, loginWithGoogle, loginWithFacebook, loginWithApple } =
+    CreateSigner(config, user);
+
+  const handleClick = () => {
+    window.location.href = "/Passkey";
+  };
+  const handleClickEmail = () => {
+    window.location.href = "/Email-Auth";
+  };
+  const handleClickBack = () => {
+    window.location.href = "/";
+  };
 
   useEffect(() => {
     if (signer) {
       console.log("Signer initialized:", signer);
     }
+	console.log("user address",user?.address)
   }, [signer]);
 
   function isValidAddress(address: string): boolean {
@@ -236,7 +232,7 @@ export default function Home() {
           >
             {isSendingUserOperation ? "Sending..." : "Send Tokens"}
           </button>
-          {/* <h1>if you not have passkey then generate</h1>
+          <h1>if you not have passkey then generate</h1>
           <button
             className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition w-full"
             disabled={isAddingPasskey}
@@ -245,7 +241,7 @@ export default function Home() {
             }}
           >
             Add Passkey
-          </button> */}
+          </button>
           {isTransactionInProgress && (
             <p className="mt-2 text-gray-600 font-medium">
               Estimated Gas: {estimatedGas} Gwei
@@ -289,35 +285,68 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <>
-          <button
-            onClick={loginWithGoogle}
-            className="btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          >
-            Google SignUp/login
-          </button>
-          <button
-            onClick={loginWithFacebook}
-            className="mt-4 btn btn-primary bg-green-500
-			 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          >
-            facebook
-          </button>
-          <button
-            onClick={loginWithApple}
-            className="mt-4 btn btn-primary bg-green-500
-			 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-          >
-            apple
-          </button>
-          {/* <button
-		onClick={loginWithPassKey}
-		className="mt-4 btn btn-primary bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded transition disabled:bg-gray-400"
-	  >
-		Passkey login
-	  </button> */}
-        </>
+        <div className="flex justify-center my-8">
+          <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-lg">
+            <h2 className="text-2xl font-semibold text-center mb-6">
+              Sign In / Sign Up
+            </h2>
+
+            {/* Social Logins Section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 text-center mb-4">
+                Social Logins
+              </h3>
+              <div className="space-y-4">
+                <button
+                  onClick={loginWithGoogle}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded transition"
+                >
+                  Sign in with Google
+                </button>
+
+                <button
+                  onClick={loginWithFacebook}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition"
+                >
+                  Sign in with Facebook
+                </button>
+
+                <button
+                  onClick={loginWithApple}
+                  className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 rounded transition"
+                >
+                  Sign in with Apple
+                </button>
+              </div>
+            </div>
+
+            {/* Alternative Login Section */}
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700 text-center mb-4">
+                Alternative Login
+              </h3>
+              <button
+                onClick={handleClick}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded transition"
+              >
+                Passkey SinUp / Login
+              </button>
+              <button
+                onClick={handleClickEmail}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded transition mt-3"
+              >
+                Email Login
+              </button>
+            </div>
+          </div>
+        </div>
       )}
+      <button
+        onClick={handleClickBack}
+        className=" bg-black-500 hover:bg-black-600 text-white font-semibold py-3 rounded transition mt-3"
+      >
+        Go back
+      </button>
     </main>
   );
 }

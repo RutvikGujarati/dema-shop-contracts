@@ -14,6 +14,10 @@ import { useChain } from "@account-kit/react";
 import { config } from "@/config";
 import { getSigner } from "@account-kit/core";
 import { AlchemyWebSigner } from "@account-kit/signer";
+import { LocalAccountSigner } from "@aa-sdk/core";
+import { alchemy, sepolia } from "@account-kit/infra";
+import { createLightAccountAlchemyClient } from "@account-kit/smart-contracts";
+import { generatePrivateKey, mnemonicToAccount } from "viem/accounts";
 
 export default function Home() {
   const { addPasskey, isAddingPasskey } = useAddPasskey();
@@ -78,6 +82,7 @@ export default function Home() {
 
           // Clear the stored bundle after authentication
           setStoredBundle(null);
+		  alert("smart account created!")
         } catch (error) {
           console.error("Error completing email authentication:", error);
         }
@@ -125,6 +130,7 @@ export default function Home() {
         email: email,
       });
       console.log("Email link sent for authentication");
+      alert(`Email link sent for authentication to: ${email}`);
       setProcessing(false);
     } catch (error: unknown) {
       setProcessing(false);

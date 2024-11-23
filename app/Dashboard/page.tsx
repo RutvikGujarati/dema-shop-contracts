@@ -1,35 +1,70 @@
-// app/login/page.tsx
-
 "use client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import authModule from "@/modules/auth"; // Importing the module
+import { config } from "@/config";
+import { getSigner } from "@account-kit/core";
+import { AlchemyWebSigner } from "@account-kit/signer";
 
 const Home = () => {
-  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [signer, setSigner] = useState<AlchemyWebSigner | null>(null);
 
   useEffect(() => {
-    const storedAddress = localStorage.getItem("address");
-    const verified = localStorage.getItem("verified"); 
+    const initializeSigner = async () => {
+      const signerInstance = new authModule.AuthManager(config);
+      const signer = await signerInstance.CreateSigner(config);
+      if (signer) {
+        setSigner(signer);
+        console.log("Signer initialized successfully", signer);
+      } else {
+        console.error("Failed to initialize signer");
+      }
+    };
+    const createAccount = new authModule.CreateAccount();
 
-    if (storedAddress && verified === "true") {
+    const userAddress =  createAccount.Account();
+    console.log("Fetched user address:", userAddress);
+
+    initializeSigner();
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      if (!signer) {
+        setAuthError("Failed to initialize signer");
+        return;
+      }
+
+      const loginWithGoogle = new authModule.OAuthLogin(signer); // Using LoginWithGoogle from authModule
+      await loginWithGoogle.authenticate("google", "/SignUp");
       setIsAuthenticated(true);
-    } else {
-      router.push("/Eth-Email"); 
+    } catch (error: any) {
+      setAuthError(`Error during login: ${error.message}`);
     }
-  }, [router]);
+  };
 
-  if (!isAuthenticated) {
-    return null; 
-  }
+  const userAddress = async () => {
+    try {
+      const user = new authModule.CreateAccount();
+      const userAddress = user.Account();
+
+      console.log(userAddress);
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-green-500 to-blue-800 text-white">
-      <div className="flex flex-col items-center gap-8 w-full max-w-md p-8 bg-white rounded-lg shadow-lg text-gray-800">
-        <h2 className="text-2xl font-bold">Welcome to the Dashboard!</h2>
-        <p className="text-lg">You are successfully logged in.</p>
-      </div>
-    </main>
+    <div>
+      <h1>Welcome to the Next.js App</h1>
+      {isAuthenticated ? (
+        <p>You are logged in with Google!</p>
+      ) : (
+        <button onClick={handleLogin}>Login with Google</button>
+      )}
+      {authError && <p style={{ color: "red" }}>{authError}</p>}
+    </div>
   );
 };
 
