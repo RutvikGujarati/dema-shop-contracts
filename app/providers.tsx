@@ -1,5 +1,7 @@
 "use client";
 import { config, queryClient } from "@/config";
+import { AcrossProvider } from "@/context/AcrossProvider";
+import { WagmiProvider } from "@/context/WagmiProvider";
 import { AlchemyClientState } from "@account-kit/core";
 import { AlchemyAccountProvider } from "@account-kit/react";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -15,7 +17,7 @@ export const Providers = (
         queryClient={queryClient}
         initialState={props.initialState}
       >
-        {props.children}
+        <AcrossProvider>{props.children}</AcrossProvider>
       </AlchemyAccountProvider>
     </QueryClientProvider>
   );

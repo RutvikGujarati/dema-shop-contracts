@@ -12,6 +12,9 @@ import {
   sepolia,
 } from "@account-kit/infra";
 import { QueryClient } from "@tanstack/react-query";
+import apple from "./apple.png";
+
+const appleLogoUrl: string = typeof apple === "string" ? apple : apple.src;
 
 const uiConfig: AlchemyAccountsUIConfig = {
   illustrationStyle: "outline",
@@ -28,7 +31,7 @@ const uiConfig: AlchemyAccountsUIConfig = {
           type: "social",
           authProviderId: "auth0",
           auth0Connection: "apple",
-          logoUrl: "https://www.freeiconspng.com/img/14895",
+          logoUrl: "appleLogoUrl",
           mode: "popup",
         },
       ],
@@ -73,7 +76,7 @@ export const config = createConfig(
     storage: cookieStorage, // more about persisting state with cookies: https://accountkit.alchemy.com/react/ssr#persisting-the-account-state
     enablePopupOauth: true, // must be set to "true" if you plan on using popup rather than redirect in the social login flow
   },
-  
+
   uiConfig
 );
 
