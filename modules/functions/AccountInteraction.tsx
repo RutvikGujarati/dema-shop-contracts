@@ -13,7 +13,7 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { baseSepolia, sepolia, polygonAmoy } from "@account-kit/infra";
-
+import { encodeFunctionData } from "viem";
 
 // Type Definitions
 type ChainType = "polygonAmoy" | "sepolia" | "baseSepolia";
@@ -47,7 +47,6 @@ export default function useDemaAccountKit() {
   // Transaction state
   const [estimatedGas, setEstimatedGas] = useState("");
   const [isTransactionInProgress, setTransactionInProgress] = useState(false);
-
 
   // Utility Functions
   function getPolicyId(chain: ChainType): string | undefined {
@@ -145,57 +144,49 @@ export default function useDemaAccountKit() {
       throw err;
     }
   }
-  function encodeFunctionData({
-    abi,
-    functionName,
-    args,
-  }: {
-    abi: any[];
-    functionName: string;
-    args: any[];
-  }): string {
-    const contractInterface = new ethers.Interface(abi);
-    return contractInterface.encodeFunctionData(functionName, args);
-  }
+
   async function CallContract(
-    contractAddress: `0x${string}`, // Ensures a valid Ethereum address format
-    ABI: any[],
-    functionName: string,
-    amount: string,
-    args: any[]
+    contractAddress: any, // Contract address in the format `0x${string}`
+    ABI: any[], // ABI array for the contract
+    functionName: any, // Name of the function to call
+    amount: string, // Ether amount to send (as a string)
+    args: any[] // Array of arguments for the function
   ) {
-    setStartTime(new Date().getTime());
-    const rpcUrl = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC!;
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-
-    // Generate function data using the ABI
-    const functionData = encodeFunctionData({
-      abi: ABI, // Expecting an ABI array
-      functionName: functionName,
-      args: [ethers.parseEther(amount), args],
-    });
-
     try {
-      // Estimate gas for the transaction
+      // Set the start time for tracking
+      setStartTime(new Date().getTime());
+
+      const rpcUrl = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC;
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      const functionData = encodeFunctionData({
+        abi: ABI,
+        functionName: functionName,
+        args: args,
+      });
+
       const gasEstimate = await provider.estimateGas({
         to: contractAddress,
         value: ethers.parseEther(amount),
         data: functionData,
       });
 
-      setEstimatedGas(ethers.formatUnits(gasEstimate, "gwei"));
+      const gas = ethers.formatUnits(gasEstimate);
+      console.log(gas);
+      setEstimatedGas(gas);
       setTransactionInProgress(true);
 
-      // Send the transaction as a UserOperation
-      sendUserOperation({
+      const result =  sendUserOperation({
         uo: {
           target: contractAddress,
           data: functionData,
           value: ethers.parseEther(amount),
         },
       });
+
+      console.log("Transaction sent successfully!",result);
     } catch (error) {
-      console.error("Gas estimation or transaction error:", error);
+      console.error("Error in CallContract:", error);
     }
   }
 
@@ -245,8 +236,8 @@ export default function useDemaAccountKit() {
     //contract Function
     CallContract,
     fetchTokenBalance,
-	TokenBalance,
-	
+    TokenBalance,
+
     // Policy ID and RPC URL
     getPolicyId,
     getRpcUrl,

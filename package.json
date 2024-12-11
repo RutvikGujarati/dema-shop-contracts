@@ -16,6 +16,9 @@
     "@account-kit/react": "^4.0.0",
     "@across-protocol/app-sdk": "^0.0.4",
     "@auth0/nextjs-auth0": "^3.5.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@tanstack/react-query": "^5.50.1",
     "@testing-library/jest-dom": "^6.6.2",
     "@testing-library/react": "^16.0.1",
@@ -36,6 +39,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-router-dom": "^6.27.0",
+    "rollup-plugin-dts": "^6.1.1",
     "ts-jest": "^29.2.5",
     "ui-components-qs-nextjs": "file:",
     "viem": "2.20.0",
@@ -51,8 +55,15 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
     "postcss": "^8",
+    "rollup": "^4.28.1",
     "tailwindcss": "^3.4.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
-  }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
 }

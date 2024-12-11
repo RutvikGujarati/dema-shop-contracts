@@ -1,0 +1,13 @@
+# Ignore Next.js-specific folders
+pages/
+app/
+public/
+styles/
+# Ignore build artifacts not meant for the SDK
+.next/
+out/
+node_modules/
+# Ignore tests and other development files
+__tests__/
+coverage/
+jest.config.js
